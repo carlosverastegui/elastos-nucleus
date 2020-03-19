@@ -1,6 +1,6 @@
 import gc
 import logging
-
+import json
 import csv
 
 from django.apps import apps
@@ -114,9 +114,9 @@ def feed(request):
         view_name = items.view.split(':')[1]  # get the view name
         your_activity_model = get_activity_model(view_name)
         if your_activity_model is None:
-            your_activity_list.append({
+            your_activity_list.append(json.dumps({
                 'display_string': 'You just visited "{0}" page'.format(items.name)
-            })
+            }))
         else:
             for app in all_apps:
                 app_models = apps.get_app_config(app).get_models()
@@ -124,13 +124,13 @@ def feed(request):
                     try:
                         if model.__name__ == your_activity_model:
                             obj_model = model.objects.filter(did=did).last()
-                            your_activity_list.append(obj_model.your_activity()[view_name])
+                            your_activity_list.append(json.dumps(obj_model.your_activity()[view_name]))
                             model_found = True
                             break
                     except Exception as e:
-                        your_activity_list.append({
+                        your_activity_list.append(json.dumps({
                             'display_string': 'You just visited "{0}" page'.format(items.name)
-                        })
+                        }))
                 if model_found:
                     break
 
